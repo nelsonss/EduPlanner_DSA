@@ -8,6 +8,7 @@ import { useSearch } from '../../App';
 import { useSkills } from '../../contexts/SkillContext';
 import { useUser } from '../../contexts/UserContext';
 
+// --- Constants for Styling ---
 const statusColors: { [key in SkillStatus]: string } = {
     [SkillStatus.NotStarted]: 'bg-accent-red/20 border-accent-red text-accent-red',
     [SkillStatus.InProgress]: 'bg-accent-yellow/20 border-accent-yellow text-accent-yellow',
@@ -22,6 +23,7 @@ const statusBgColors: { [key in SkillStatus]: string } = {
     [SkillStatus.Reinforcement]: 'bg-accent-blue',
 };
 
+// --- Type Definitions ---
 interface CalculatedSkillNode extends SkillNode {
     calculatedPosition: { x: number; y: number };
     isVisible: boolean;
@@ -29,14 +31,23 @@ interface CalculatedSkillNode extends SkillNode {
     status: SkillStatus;
 }
 
-// Helper function to determine the hierarchical level of each node in a DAG
+// --- Helper Functions ---
+
+/**
+ * Calculates the hierarchical level of each node in a Directed Acyclic Graph (DAG).
+ * This is crucial for arranging nodes in columns based on their dependencies.
+ * A node's level is determined by the longest path from a root node (level 0) to it.
+ * @param nodes The array of all skill nodes.
+ * @param skillMap A map for quick node lookup by ID.
+ * @returns A map of [nodeId, level].
+ */
 const calculateNodeLevels = (
     nodes: SkillNode[], 
     skillMap: Map<string, SkillNode>
 ): Map<string, number> => {
     const nodeIds = new Set(nodes.map(n => n.id));
     const levels = new Map<string, number>();
-    const memo = new Map<string, number>();
+    const memo = new Map<string, number>(); // Memoization for performance
 
     const getLevel = (nodeId: string): number => {
         if (memo.has(nodeId)) return memo.get(nodeId)!;
@@ -44,11 +55,13 @@ const calculateNodeLevels = (
         const node = skillMap.get(nodeId)!;
         const parentIds = node.prerequisites.filter(pId => nodeIds.has(pId));
 
+        // Base case: A node with no prerequisites is at level 0.
         if (parentIds.length === 0) {
             memo.set(nodeId, 0);
             return 0;
         }
 
+        // Recursive step: A node's level is 1 + the maximum level of its parents.
         const maxParentLevel = Math.max(...parentIds.map(pId => getLevel(pId)));
         const level = maxParentLevel + 1;
         memo.set(nodeId, level);
@@ -62,6 +75,8 @@ const calculateNodeLevels = (
 };
 
 
+// --- Sub-components ---
+
 const Node: React.FC<{ 
     node: CalculatedSkillNode; 
     onClick: () => void; 
@@ -70,16 +85,19 @@ const Node: React.FC<{
     onToggleExpand: (e: React.MouseEvent) => void;
     index: number; 
 }> = ({ node, onClick, onMouseDown, isExpanded, onToggleExpand, index }) => {
+    // State to trigger the initial render animation.
     const [isRendered, setIsRendered] = useState(false);
-
     useEffect(() => {
-        const timer = setTimeout(() => setIsRendered(true), 10);
+        const timer = setTimeout(() => setIsRendered(true), 10); // Small delay to ensure transition is applied
         return () => clearTimeout(timer);
     }, []);
 
+    // Animation properties
     const initialTransform = `translate(${node.calculatedPosition.x}px, ${node.calculatedPosition.y + 15}px) scale(0.9)`;
     const finalTransform = `translate(${node.calculatedPosition.x}px, ${node.calculatedPosition.y}px) scale(${node.isVisible ? 1 : 0.8})`;
     const highlightClass = node.isHighlighted ? 'ring-2 ring-brand-primary ring-offset-2 ring-offset-white dark:ring-offset-background-light' : '';
+    
+    // Node dimensions based on whether it's a parent skill
     const nodeWidth = node.isParent ? '144px' : '128px';
     const nodeHeight = node.isParent ? '88px' : '80px';
     const cursorClass = node.isVisible ? 'grab' : 'default';
@@ -92,7 +110,7 @@ const Node: React.FC<{
                 height: nodeHeight,
                 transform: isRendered ? finalTransform : initialTransform,
                 opacity: isRendered ? (node.isVisible ? 1 : 0.2) : 0,
-                transitionDelay: `${index * 40}ms`,
+                transitionDelay: `${index * 40}ms`, // Staggered animation effect
                 cursor: cursorClass,
                 pointerEvents: node.isVisible ? 'auto' : 'none',
                 zIndex: node.isParent ? 10 : 5,
@@ -108,7 +126,7 @@ const Node: React.FC<{
                         onClick={onToggleExpand}
                         className="absolute -bottom-3.5 -right-3.5 bg-background-light border-2 border-gray-600 rounded-full w-7 h-7 flex items-center justify-center hover:bg-brand-primary transition-colors z-20"
                         aria-label={isExpanded ? 'Collapse sub-skills' : 'Expand sub-skills'}
-                        onMouseDown={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()} // Prevent node drag when clicking the button
                     >
                         <Icon name={isExpanded ? 'chevron-up' : 'chevron-down'} className="w-4 h-4" />
                     </button>
@@ -118,10 +136,13 @@ const Node: React.FC<{
     );
 };
 
+// --- Main Component ---
+
 const filterOptions: (SkillStatus | 'all')[] = ['all', SkillStatus.Mastered, SkillStatus.InProgress, SkillStatus.NotStarted, SkillStatus.Reinforcement];
 const filterLabels: { [key in SkillStatus | 'all']: string } = { 'all': 'All', [SkillStatus.Mastered]: 'Mastered', [SkillStatus.InProgress]: 'In Progress', [SkillStatus.NotStarted]: 'Not Started', [SkillStatus.Reinforcement]: 'Needs Reinforcement' };
 
 export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, SkillNode> }> = ({ skills, skillMap }) => {
+    // --- State Management ---
     const { searchQuery } = useSearch();
     const { user } = useUser();
     const navigate = useNavigate();
@@ -129,23 +150,27 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
     const [aiFeedback, setAiFeedback] = useState<string>('');
     const [isFeedbackLoading, setIsFeedbackLoading] = useState<boolean>(false);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [view, setView] = useState({ x: 20, y: 20, scale: 1 });
-    const [activeFilter, setActiveFilter] = useState<SkillStatus | 'all'>('all');
+    const [view, setView] = useState({ x: 20, y: 20, scale: 1 }); // Manages pan and zoom
+    const [activeFilter, setActiveFilter] = useState<SkillStatus | 'all'>('all'); // Manages node visibility filter
     const [expandedNodes, setExpandedNodes] = useState<Set<string>>(() => new Set(skills.filter(n => n.isParent).map(n => n.id)));
 
+    // --- Refs for Interaction Logic ---
     const isPanning = useRef(false);
     const panStart = useRef({ x: 0, y: 0 });
     const dragInfo = useRef<{ nodeId: string | null; startNodePos: {x: number, y: number}, startMousePos: {x: number, y: number} }>({ nodeId: null, startNodePos: {x:0, y:0}, startMousePos: {x:0,y:0} });
-    const hasDragged = useRef(false);
+    const hasDragged = useRef(false); // Differentiates a click from a drag
 
+    // --- Layout Calculation ---
+    // This complex memoized calculation determines the initial, "default" layout of the skill tree.
+    // It runs only when the underlying skills data changes.
     const { defaultPositions, containerSize } = useMemo(() => {
         const NODE_WIDTH = 144, NODE_HEIGHT = 88;
         const PADDING = 50;
     
-        // 1. Separate "macro" nodes (parents, standalone skills) from sub-skills
+        // 1. Isolate "macro" nodes (parents or skills without parents) to form the main tree structure.
         const macroNodes = skills.filter(n => n.isParent || !n.prerequisites.some(p => skillMap.get(p)?.isParent));
         
-        // 2. Calculate levels and positions for macro nodes hierarchically
+        // 2. Calculate hierarchical levels for macro nodes. This determines their column.
         const macroLevelsMap = calculateNodeLevels(macroNodes, skillMap);
         const levels = new Map<number, string[]>();
         macroLevelsMap.forEach((level, nodeId) => {
@@ -157,9 +182,10 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
         const macroPositions = new Map<string, { x: number; y: number }>();
         const levelEntries = Array.from(levels.entries()).sort((a, b) => a[0] - b[0]);
 
+        // 3. Position macro nodes in a grid based on their level (x-axis) and index within the level (y-axis).
         levelEntries.forEach(([level, nodesInLevel]) => {
             const y = level * VERTICAL_GAP_MACRO;
-            nodesInLevel.sort((a, b) => a.localeCompare(b)); // Stable sorting
+            nodesInLevel.sort((a, b) => a.localeCompare(b)); // Sort for a stable layout
             nodesInLevel.forEach((nodeId, index) => {
                 const numNodes = nodesInLevel.length;
                 const x = (index - (numNodes - 1) / 2) * HORIZONTAL_GAP_MACRO;
@@ -167,10 +193,9 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
             });
         });
 
-        // 4. Start building final positions map
         const finalPositions = new Map(macroPositions);
 
-        // 5. Position sub-skills relative to their parents
+        // 4. Position sub-skills to the right of their parent node.
         const SUB_NODE_OFFSET_X = NODE_WIDTH + 50;
         const SUB_NODE_HEIGHT = 80;
         const SUB_NODE_VERTICAL_GAP = 15;
@@ -187,11 +212,11 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
             }
         });
         
-        // 6. Center the entire layout and calculate container size
         if (finalPositions.size === 0) {
             return { defaultPositions: new Map(), containerSize: { width: 500, height: 500 } };
         }
 
+        // 5. Center the entire layout by finding the bounds and offsetting all positions.
         const allX = Array.from(finalPositions.values()).map(p => p.x);
         const allY = Array.from(finalPositions.values()).map(p => p.y);
         const minX = Math.min(...allX);
@@ -208,6 +233,8 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
 
     }, [skills, skillMap]);
     
+    // --- State Persistence ---
+    // Initialize node positions from localStorage if available, otherwise use the calculated default.
     const [nodePositions, setNodePositions] = useState<Map<string, { x: number; y: number }>>(() => {
         try {
             const savedLayout = localStorage.getItem('skillTreeLayout');
@@ -215,10 +242,12 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
         } catch (error) { return defaultPositions; }
     });
     
+    // Save any changes to node positions to localStorage.
     useEffect(() => {
         localStorage.setItem('skillTreeLayout', JSON.stringify(Array.from(nodePositions.entries())));
     }, [nodePositions]);
 
+    // --- Event Handlers ---
     const handleToggleExpand = useCallback((e: React.MouseEvent, nodeId: string) => {
         e.stopPropagation();
         setExpandedNodes(prev => {
@@ -229,10 +258,12 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
         });
     }, []);
 
+    // Memoized calculation to determine which nodes should be visible based on filters and expanded parents.
     const visibleNodeIds = useMemo(() => {
         const visibleIds = new Set<string>();
         const statusFilteredIds = new Set<string>();
 
+        // First, apply the status filter if it's not 'all'.
         if (activeFilter !== 'all') {
             skills.forEach(node => {
                 if (getSkillStatus(node.proficiency) === activeFilter) {
@@ -241,6 +272,7 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
             });
         }
 
+        // Recursively add all prerequisites of visible nodes to ensure no floating nodes.
         const getPrerequisitesRecursive = (nodeId: string) => {
             if (visibleIds.has(nodeId)) return;
             const node = skillMap.get(nodeId);
@@ -256,7 +288,7 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
             }
         });
 
-        // Ensure sub-skills are only visible if their parent is expanded
+        // Finally, hide sub-skills if their parent node is collapsed.
         skills.forEach(node => {
             const parentId = node.prerequisites.find(p => skillMap.get(p)?.isParent);
             if (parentId && !expandedNodes.has(parentId)) {
@@ -268,12 +300,14 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
 
     }, [activeFilter, skills, skillMap, expandedNodes]);
 
+    // Memoized calculation for highlighting nodes based on the search query.
     const highlightedNodeIds = useMemo(() => {
         if (!searchQuery.trim()) return new Set<string>();
         const lowercasedQuery = searchQuery.toLowerCase();
         return new Set(skills.filter(n => n.name.toLowerCase().includes(lowercasedQuery) || n.description.toLowerCase().includes(lowercasedQuery)).map(n => n.id));
     }, [searchQuery, skills]);
 
+    // Memoized calculation to create the final node and edge data for rendering.
     const { positionedNodes, nodeMapWithCalcPos, edges } = useMemo(() => {
         const nodesWithStatus = skills.map(node => ({
             ...node,
@@ -308,6 +342,9 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
         return { positionedNodes, nodeMapWithCalcPos, edges };
     }, [skills, nodePositions, visibleNodeIds, highlightedNodeIds]);
     
+    // --- Mouse Interaction Handlers ---
+    
+    // Initiates a node drag operation.
     const handleNodeMouseDown = useCallback((e: React.MouseEvent, nodeId: string) => {
         e.stopPropagation();
         hasDragged.current = false;
@@ -317,8 +354,9 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
         if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
     }, [nodePositions]);
 
+    // Handles clicking on a node to show details and fetch AI feedback.
     const handleNodeClick = useCallback(async (node: CalculatedSkillNode) => {
-        if (hasDragged.current) return;
+        if (hasDragged.current) return; // Prevent modal from opening if the user was dragging.
         setSelectedNode(node);
         setAiFeedback('');
         setIsFeedbackLoading(true);
@@ -333,31 +371,43 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
         }
     }, [skills, user]);
 
+    // Initiates a pan operation on the canvas.
     const handleMouseDown = (e: React.MouseEvent) => {
-        if (e.button !== 0 || dragInfo.current.nodeId) return;
+        if (e.button !== 0 || dragInfo.current.nodeId) return; // Only pan with left-click if not dragging a node.
         e.preventDefault();
         panStart.current = { x: e.clientX - view.x, y: e.clientY - view.y };
         isPanning.current = true;
         if (containerRef.current) containerRef.current.classList.add('cursor-grabbing');
     };
+    
+    // Ends pan or drag operations.
     const handleMouseUp = () => {
         isPanning.current = false;
         if (dragInfo.current.nodeId && containerRef.current) containerRef.current.style.cursor = 'grab';
         dragInfo.current.nodeId = null;
         if (containerRef.current) containerRef.current.classList.remove('cursor-grabbing');
     };
+    
+    // Handles mouse movement for both panning and dragging nodes.
     const handleMouseMove = (e: React.MouseEvent) => {
+        // Drag a single node
         if (dragInfo.current.nodeId) {
             const { nodeId, startNodePos, startMousePos } = dragInfo.current;
             const dx = e.clientX - startMousePos.x;
             const dy = e.clientY - startMousePos.y;
+            // Set `hasDragged` flag if movement exceeds a small threshold.
             if (Math.abs(dx) > 5 || Math.abs(dy) > 5) hasDragged.current = true;
+            // Update the position of the dragged node.
             const newPos = { x: startNodePos.x + dx / view.scale, y: startNodePos.y + dy / view.scale };
             setNodePositions(prev => new Map(prev).set(nodeId, newPos));
-        } else if (isPanning.current) {
+        } 
+        // Pan the entire view
+        else if (isPanning.current) {
             setView(prev => ({ ...prev, x: e.clientX - panStart.current.x, y: e.clientY - panStart.current.y }));
         }
     };
+    
+    // Handles zooming with the mouse wheel.
     const handleWheel = (e: React.WheelEvent) => {
         e.preventDefault();
         const container = containerRef.current;
@@ -368,6 +418,7 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
         const rect = container.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
+        // Zoom relative to the mouse cursor's position.
         setView(prev => {
             const newScale = Math.max(0.25, Math.min(prev.scale * scaleAmount, 2.5));
             const newX = mouseX - (mouseX - prev.x) * (newScale / prev.scale);
@@ -375,10 +426,13 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
             return { scale: newScale, x: newX, y: newY };
         });
     };
+    
+    // --- UI Control Handlers ---
     const handleZoom = (direction: 'in' | 'out') => {
         setView(prev => {
             const scaleAmount = direction === 'in' ? 1.25 : 0.8;
             const newScale = Math.max(0.25, Math.min(prev.scale * scaleAmount, 2.5));
+            // Zoom relative to the center of the view.
             const centerX = containerRef.current ? containerRef.current.clientWidth / 2 : 0;
             const centerY = containerRef.current ? containerRef.current.clientHeight / 2 : 0;
             const newX = centerX - (centerX - prev.x) * (newScale / prev.scale);
@@ -386,19 +440,23 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
             return { scale: newScale, x: newX, y: newY };
         });
     };
+    
     const handleAutoArrange = () => setNodePositions(defaultPositions);
+    
     const resetLayoutAndZoom = () => {
         setView({ x: 20, y: 20, scale: 1 });
         setNodePositions(defaultPositions);
         localStorage.removeItem('skillTreeLayout');
     };
 
+    // --- Render ---
     return (
         <div 
             className="relative w-full h-[600px] bg-gray-50 dark:bg-background-light/50 rounded-lg overflow-hidden cursor-grab"
             ref={containerRef}
             onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onMouseMove={handleMouseMove} onWheel={handleWheel}
         >
+             {/* UI Controls */}
              <div className="absolute top-4 left-4 z-10 flex space-x-1 bg-white dark:bg-background-light p-1 rounded-lg border border-gray-200 dark:border-gray-700">
                 {filterOptions.map(option => <button key={option} onClick={() => setActiveFilter(option)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${activeFilter === option ? 'bg-brand-primary text-white' : 'text-gray-600 dark:text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'}`}>{filterLabels[option]}</button>)}
              </div>
@@ -408,10 +466,13 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
                 <button onClick={handleAutoArrange} className="p-2 text-gray-500 dark:text-text-secondary hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors" aria-label="Auto-arrange layout"><Icon name="autoArrange" /></button>
                 <button onClick={resetLayoutAndZoom} className="p-2 text-gray-500 dark:text-text-secondary hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors" aria-label="Reset view"><Icon name="reset" /></button>
             </div>
+            
+            {/* The main canvas for nodes and edges */}
             <div
                 className="transition-transform duration-200"
                 style={{ width: containerSize.width, height: containerSize.height, transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`, transformOrigin: '0 0', pointerEvents: 'none' }}
             >
+                {/* Edges rendered as SVG paths */}
                 <svg className="absolute top-0 left-0 w-full h-full" style={{ pointerEvents: 'none' }}>
                     <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a0aec0" /></marker></defs>
                     {edges.map(({ from, to, isVisible, type }, index) => {
@@ -419,14 +480,18 @@ export const SkillTree: React.FC<{ skills: SkillNode[], skillMap: Map<string, Sk
                         const toWidth = to.isParent ? 144 : 128; const toHeight = to.isParent ? 88 : 80;
                         const fromX = from.calculatedPosition.x + fromWidth; const fromY = from.calculatedPosition.y + fromHeight / 2;
                         const toX = to.calculatedPosition.x; const toY = to.calculatedPosition.y + toHeight / 2;
-                        const controlOffsetX = Math.max(50, Math.abs(toX - fromX) * 0.4);
+                        const controlOffsetX = Math.max(50, Math.abs(toX - fromX) * 0.4); // For curved lines
                         return <path key={index} d={`M ${fromX} ${fromY} C ${fromX + controlOffsetX} ${fromY}, ${toX - controlOffsetX} ${toY}, ${toX} ${toY}`} stroke="#a0aec0" strokeWidth="2" strokeDasharray={type === 'subskill' ? '4 4' : 'none'} fill="transparent" markerEnd="url(#arrow)" className="transition-opacity duration-500" style={{ opacity: isVisible ? 1 : 0.15 }} />;
                     })}
                 </svg>
+                
+                {/* Nodes rendered as HTML divs */}
                 <div style={{ pointerEvents: 'auto', position: 'relative', width: '100%', height: '100%' }}>
                     {positionedNodes.map((node, index) => <Node key={node.id} node={node} onClick={() => handleNodeClick(node)} onMouseDown={(e) => handleNodeMouseDown(e, node.id)} index={index} isExpanded={expandedNodes.has(node.id)} onToggleExpand={(e) => handleToggleExpand(e, node.id)} />)}
                 </div>
             </div>
+
+            {/* Modal for displaying selected node details */}
             {selectedNode && (
                 <Modal title={selectedNode.name} onClose={() => setSelectedNode(null)}>
                     <div className="p-4 text-gray-600 dark:text-text-secondary">

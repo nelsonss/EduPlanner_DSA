@@ -6,7 +6,10 @@ import { generateCodingProblem, generateStrategyFeedback, generateCodeFeedback }
 import { CodingProblem, StrategyFeedbackResponse, CodeFeedbackResponse, CognitiveInference } from '../types';
 import { Icon } from '../components/shared/Icon';
 
+// The LabPage functions as a state machine, progressing through these steps.
 type LabStep = 'initial' | 'planning' | 'coding' | 'feedback';
+
+// --- Sub-components ---
 
 const LoadingIndicator: React.FC<{ text: string }> = ({ text }) => (
     <div className="flex items-center justify-center space-x-2 text-text-secondary">
@@ -21,6 +24,7 @@ const LoadingIndicator: React.FC<{ text: string }> = ({ text }) => (
 const FeedbackDisplay: React.FC<{ title: string; feedback: string; inferences: CognitiveInference[] }> = ({ title, feedback, inferences }) => (
     <div className="mt-4 p-4 bg-background-dark rounded-lg border border-gray-700 space-y-3">
         <h4 className="font-semibold text-text-primary">{title}</h4>
+        {/* whitespace-pre-wrap is important to respect newlines from the AI's Markdown response */}
         <p className="text-sm text-text-secondary whitespace-pre-wrap">{feedback}</p>
         <div>
             <h5 className="text-xs font-bold uppercase text-text-secondary mb-1">Cognitive Insights:</h5>
@@ -35,33 +39,42 @@ const FeedbackDisplay: React.FC<{ title: string; feedback: string; inferences: C
     </div>
 );
 
+// --- Main Component ---
 
 export const LabPage: React.FC = () => {
+    // --- State Management ---
     const { skills, updateSkillProficiency } = useSkills();
     const { updateCognitiveProfile } = useUser();
 
+    // State for the current step in the lab's workflow.
     const [step, setStep] = useState<LabStep>('initial');
+    // State for user inputs in the initial problem generation form.
     const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
     const [selectedDifficulty, setSelectedDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Easy');
+    // Generic loading and error states for various async operations.
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     
+    // State to hold the data for the current practice session.
     const [problem, setProblem] = useState<CodingProblem | null>(null);
     const [strategy, setStrategy] = useState('');
     const [strategyFeedback, setStrategyFeedback] = useState<StrategyFeedbackResponse | null>(null);
     const [code, setCode] = useState('');
     const [codeFeedback, setCodeFeedback] = useState<CodeFeedbackResponse | null>(null);
     
+    // Memoize the list of skills that can be practiced to avoid recalculation on every render.
     const practiceableSkills = useMemo(() => skills.filter(s => !s.isParent), [skills]);
 
+    // --- Side Effects ---
+    // This effect loads a saved code draft from localStorage when a new problem is generated.
     useEffect(() => {
-        // Auto-save/load code draft for a specific problem
         if (problem) {
             const savedCode = localStorage.getItem(`codeDraft_${problem.title}`);
             if (savedCode) setCode(savedCode);
         }
     }, [problem]);
 
+    // This effect auto-saves the user's code to localStorage. It's debounced to avoid excessive writes.
     useEffect(() => {
         if (problem) {
             const handler = setTimeout(() => {
@@ -71,6 +84,12 @@ export const LabPage: React.FC = () => {
         }
     }, [code, problem]);
 
+    // --- AI Interaction Callbacks ---
+
+    /**
+     * Handles the asynchronous request to generate a new coding problem.
+     * Manages loading and error states and transitions the lab to the 'planning' step on success.
+     */
     const handleGenerateProblem = useCallback(async () => {
         if (selectedTopics.length === 0) {
             setError('Please select at least one topic.');
@@ -81,7 +100,7 @@ export const LabPage: React.FC = () => {
         try {
             const generatedProblem = await generateCodingProblem(selectedTopics, selectedDifficulty);
             setProblem(generatedProblem);
-            setStep('planning');
+            setStep('planning'); // Move to the next step
         } catch (err) {
             setError('Failed to generate a problem. The AI service may be unavailable. Please try again.');
             console.error("Error generating problem:", err);
@@ -90,17 +109,23 @@ export const LabPage: React.FC = () => {
         }
     }, [selectedTopics, selectedDifficulty]);
 
+    /**
+     * Handles the request for AI feedback on the user's strategy/plan.
+     * Updates the cognitive profile based on the AI's inferences.
+     */
     const handleGetStrategyFeedback = useCallback(async () => {
         if (!problem || !strategy.trim()) return;
         setIsLoading(true);
         try {
             const feedback = await generateStrategyFeedback(problem, strategy);
             setStrategyFeedback(feedback);
+            // Apply the cognitive changes returned by the AI to the user's profile.
             updateCognitiveProfile(
                 feedback.cognitiveInferences.reduce((acc, inf) => ({ ...acc, [inf.trait]: inf.change }), {})
             );
         } catch (err) {
             console.error("Error getting strategy feedback:", err);
+            // Provide a user-facing error message directly in the feedback object.
             setStrategyFeedback({
                 feedback: 'An error occurred while analyzing your plan. The AI service may be unavailable. Please try again.',
                 cognitiveInferences: []
@@ -110,24 +135,32 @@ export const LabPage: React.FC = () => {
         }
     }, [problem, strategy, updateCognitiveProfile]);
 
+    /**
+     * Handles the final code submission for AI review.
+     * Updates both the cognitive profile and the relevant skill proficiency based on the AI's feedback.
+     * Transitions the lab to the final 'feedback' step.
+     */
     const handleSubmitCode = useCallback(async () => {
         if (!problem || !code.trim()) return;
         setIsLoading(true);
         try {
             const feedback = await generateCodeFeedback(problem, code);
             setCodeFeedback(feedback);
+            // Apply cognitive changes.
             updateCognitiveProfile(
                 feedback.cognitiveInferences.reduce((acc, inf) => ({ ...acc, [inf.trait]: inf.change }), {})
             );
+            // Update skill proficiency based on correctness.
             const topicSkill = skills.find(s => s.name === problem.topic);
             if (topicSkill) {
                 const currentProficiency = topicSkill.proficiency;
-                const change = feedback.isCorrect ? 0.05 : -0.02;
+                const change = feedback.isCorrect ? 0.05 : -0.02; // Gain proficiency for correct, lose a little for incorrect.
                 updateSkillProficiency(topicSkill.id, currentProficiency + change);
             }
-            setStep('feedback');
+            setStep('feedback'); // Move to the final step
         } catch (err) {
             console.error("Error getting code feedback:", err);
+            // Provide a user-facing error message and still move to the feedback step.
             setCodeFeedback({
                 feedback: "An error occurred while analyzing your code. The AI service may be unavailable. Please try again.",
                 isCorrect: false,
@@ -139,7 +172,10 @@ export const LabPage: React.FC = () => {
             setIsLoading(false);
         }
     }, [problem, code, skills, updateCognitiveProfile, updateSkillProficiency]);
-
+    
+    /**
+     * Resets the entire lab state to start a new problem.
+     */
     const handleReset = () => {
         setStep('initial');
         setProblem(null);
@@ -151,6 +187,9 @@ export const LabPage: React.FC = () => {
         setError('');
     };
 
+    // --- Render Logic ---
+
+    // Renders the initial form for generating a new problem.
     const renderInitialStep = () => (
         <Card title="Problem Generation">
             <div className="space-y-4">
@@ -196,9 +235,11 @@ export const LabPage: React.FC = () => {
         </Card>
     );
 
+    // Renders the UI for the user to write their plan and get feedback.
     const renderPlanningStep = () => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <Card title={problem?.title || 'Problem'}>
+                {/* Use dangerouslySetInnerHTML to render Markdown from the AI */}
                 <div className="prose prose-invert max-w-none prose-p:text-text-secondary prose-headings:text-text-primary prose-strong:text-text-primary prose-ul:text-text-secondary" dangerouslySetInnerHTML={{ __html: problem?.description || '' }} />
             </Card>
              <Card title="1. Strategy Planner">
@@ -224,6 +265,7 @@ export const LabPage: React.FC = () => {
         </div>
     );
 
+    // Renders the main coding interface.
     const renderCodingStep = () => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
              <Card title="Problem & Your Plan">
@@ -247,6 +289,7 @@ export const LabPage: React.FC = () => {
         </div>
     );
     
+    // Renders the final feedback report after code submission.
     const renderFeedbackStep = () => (
         <Card title="Solution Review">
             <h2 className="text-xl font-bold mb-2">{problem?.title}</h2>
@@ -269,6 +312,10 @@ export const LabPage: React.FC = () => {
         </Card>
     );
 
+    /**
+     * Main render router for the component.
+     * Displays the correct UI based on the current 'step' state.
+     */
     const renderContent = () => {
         switch (step) {
             case 'initial': return renderInitialStep();
