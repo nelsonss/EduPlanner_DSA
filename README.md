@@ -6,6 +6,8 @@
 
 This project serves as a research prototype and functional application demonstrating how artificial intelligence can act not just as a content generator, but as a personal cognitive partner. It understands each student's unique learning profile, adapts materials in real-time, and creates a feedback loop that accelerates mastery and metacognitive awareness.
 
+Story : [The Infinite Map](https://g.co/gemini/share/ffe0734c2562)
+
 ---
 
 ## 💡 The Pedagogical Innovation: AI as a Cognitive Partner
