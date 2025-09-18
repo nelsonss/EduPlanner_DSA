@@ -48,6 +48,8 @@ The platform's features are not isolated tools; they form an interconnected, vir
 
 ### Pillar III: Educator-AI Synergy
 
+<img width="1609" height="1030" alt="image" src="https://github.com/user-attachments/assets/bff68afc-3042-4040-87cb-d76409027c77" />
+
 EduPlanner DSA is designed to **empower, not replace, the human educator**. The **Teacher Dashboard** positions the instructor as the "expert-in-the-loop." An instructor can:
 
 -   **Calibrate the AI:** If an instructor observes a nuance in a student's learning that the AI has missed, they can manually fine-tune the student's cognitive profile, providing the AI with invaluable ground-truth data.
@@ -57,5 +59,7 @@ EduPlanner DSA is designed to **empower, not replace, the human educator**. The 
 This synergy combines the scalability and personalization of AI with the irreplaceable wisdom and empathy of a human teacher.
 
 ## 3. The Vision: From Curriculum to Conversation
+
+<img width="1572" height="973" alt="image" src="https://github.com/user-attachments/assets/12aacaf8-3266-4a31-bc3b-4baa8d4e27ec" />
 
 EduPlanner DSA represents a shift from a static curriculum to a dynamic **conversation** between the learner, the educator, and an intelligent system. It is a prototype for a future where education is not about consuming information, but about building a deep, metacognitive awareness of one's own learning process, guided by a partner that understands you. This approach has the potential to redefine personalized learning not just in computer science, but across all complex STEM domains.
