@@ -2,9 +2,13 @@
 
 This document illustrates the practical, day-to-day value of EduPlanner DSA through a series of narrative user flows. These stories translate the platform's technical features into tangible benefits, demonstrating how students and educators interact with the AI to create a richer, more effective learning experience.
 
+Story 1: [El Algoritmo del Éxito](https://g.co/gemini/share/fa96a6d4185e)
+
 ---
 
 ### Scenario 1: Alex – The Bright but Hasty Student
+
+<img width="2339" height="1221" alt="image" src="https://github.com/user-attachments/assets/0274091d-2670-4fe2-b416-ef2135677ef3" />
 
 **Persona:** Alex is a bright computer science student who grasps complex concepts quickly. His AI-generated **Cognitive Profile** reflects this: high "Abstract Thinking" (4.5/5) and "Pattern Recognition" (4.3/5). However, he often rushes, leading to a lower "Attention to Detail" (3.2/5).
 
@@ -31,6 +35,8 @@ This document illustrates the practical, day-to-day value of EduPlanner DSA thro
 
 ### Scenario 2: Ben – The Cautious Beginner
 
+<img width="2355" height="1221" alt="image" src="https://github.com/user-attachments/assets/8b1289d4-d35c-421c-9da5-a9e7ade6c435" />
+
 **Persona:** Ben is in his first introductory DSA course. He finds the concepts abstract and is sometimes overwhelmed. He needs structure and clear, foundational explanations.
 
 **The Journey:**
@@ -51,6 +57,8 @@ This document illustrates the practical, day-to-day value of EduPlanner DSA thro
 
 ### Scenario 3: Dr. Evans – The Engaged Instructor
 
+<img width="2360" height="1218" alt="image" src="https://github.com/user-attachments/assets/6ee99444-3fef-4190-84d4-e2b7cdb190c1" />
+
 **Persona:** Dr. Evans is a university professor who uses EduPlanner DSA to supplement her DSA course. She wants to monitor her students' progress and ensure the AI's guidance aligns with her teaching goals.
 
 **The Journey:**
@@ -65,4 +73,7 @@ This document illustrates the practical, day-to-day value of EduPlanner DSA thro
     -   It provides the underlying AI model with **invaluable ground-truth data**, helping it learn and improve its inferences for all students.
     -   It immediately **re-calibrates the system for Alex**. The next time Alex requests a "Challenge Me!" problem, the AI will factor in this new, teacher-validated score, potentially giving him a slightly more complex problem that respects his recent growth.
 
+<img width="2349" height="1236" alt="image" src="https://github.com/user-attachments/assets/2718de87-0760-4fd8-a7d0-87e310c03c7f" />
+
 **Outcome:** Dr. Evans acts as the "expert-in-the-loop." She uses her professional judgment to enhance the AI's understanding, ensuring the personalized learning experience is not just data-driven, but also informed by human pedagogical insight. The platform becomes a powerful assistant that helps her scale her teaching effectively.
+
