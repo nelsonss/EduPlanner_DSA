@@ -11,6 +11,7 @@ This project serves as a research prototype and functional application demonstra
 ## 💡 The Pedagogical Innovation: AI as a Cognitive Partner
 
 EduPlanner DSA's significance lies in its novel approach to instructional design and learning personalization, making it a valuable case study for students, faculty, and administrators interested in the future of education.
+<img width="1839" height="1123" alt="image" src="https://github.com/user-attachments/assets/5b4493c4-b65d-488f-a4a6-312eafd4c07b" />
 
 
 ### 1. **Dynamic Cognitive Profiling**
