@@ -2,8 +2,6 @@
 
 <img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/9653dc83-4b87-4310-8bc8-046ef3bad552" />
 
-<img width="1024" height="1024" alt="Generated Image September 18, 2025 - 11_40AM" src="https://github.com/user-attachments/assets/40dd7738-c0e1-4c53-8cb5-e1fe6e46d01c" />
-
 **EduPlanner DSA is not merely a learning tool; it is a pedagogical ecosystem designed to transform the traditional "one-size-fits-all" curriculum into a dynamic, personalized, and deeply insightful learning journey, powered by advanced generative AI.**
 
 This project serves as a research prototype and functional application demonstrating how artificial intelligence can act not just as a content generator, but as a personal cognitive partner. It understands each student's unique learning profile, adapts materials in real-time, and creates a feedback loop that accelerates mastery and metacognitive awareness.
@@ -53,6 +51,8 @@ The **Teacher Dashboard** is a central component, not an afterthought. It empowe
 *   **Adaptive Learning Modules:** AI-generated educational content that adjusts to the learner's cognitive profile.
 *   **Detailed Performance Analytics:** In-depth visualizations and reports for tracking progress.
 *   **Teacher Dashboard:** Tools for educators to oversee student progress and calibrate the AI system.
+
+<img width="1024" height="1024" alt="Generated Image September 18, 2025 - 11_40AM" src="https://github.com/user-attachments/assets/40dd7738-c0e1-4c53-8cb5-e1fe6e46d01c" />
 
 ---
 
