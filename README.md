@@ -1,5 +1,7 @@
 # EduPlanner DSA: An AI-Powered Personal Tutor for Data Structures & Algorithms
 
+<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/9653dc83-4b87-4310-8bc8-046ef3bad552" />
+
 <img width="1024" height="1024" alt="Generated Image September 18, 2025 - 11_40AM" src="https://github.com/user-attachments/assets/40dd7738-c0e1-4c53-8cb5-e1fe6e46d01c" />
 
 **EduPlanner DSA is not merely a learning tool; it is a pedagogical ecosystem designed to transform the traditional "one-size-fits-all" curriculum into a dynamic, personalized, and deeply insightful learning journey, powered by advanced generative AI.**
