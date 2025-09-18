@@ -25,6 +25,9 @@ This profile allows for recommendations and learning modules to be adapted with 
 
 ### 2. **Real-Time Adaptive Curriculum**
 Instead of a linear learning path, the AI generates personalized **learning modules, justifications, and feedback** on the fly.
+<img width="1860" height="921" alt="image" src="https://github.com/user-attachments/assets/d8b4837b-48ee-4a2e-bf7a-3682bc6cf6db" />
+
+
 *   For a student with a lower "Abstract Thinking" score, the AI will include concrete, real-world analogies in its explanations.
 *   For a learner with lower "Attention to Detail," the AI will generate practice problems with complex edge cases.
 
