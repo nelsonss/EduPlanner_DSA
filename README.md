@@ -34,6 +34,8 @@ The `Plan -> Code -> Receive Feedback` cycle in the Practice Lab is where the co
 ### 4. **Educator-AI Synergy**
 The **Teacher Dashboard** is a central component, not an afterthought. It empowers human educators to calibrate, curate, and guide the AI, blending pedagogical expertise with the AI's ability to personalize at scale. An instructor can fine-tune a student's cognitive profile based on classroom observation, ensuring the AI acts as an extension of their teaching style.
 
+<img width="1856" height="1139" alt="image" src="https://github.com/user-attachments/assets/e6345d46-efbb-41a6-b1a4-6a5069880bdf" />
+
 ---
 
 ## ✨ Key Features
