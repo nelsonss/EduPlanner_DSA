@@ -2,6 +2,8 @@
 
 ## 1. The Problem: The Static Horizon of Traditional STEM Education
 
+<img width="2341" height="1229" alt="image" src="https://github.com/user-attachments/assets/2051dc03-c39f-4d7e-aab9-d7b146287cdc" />
+
 The traditional approach to teaching complex subjects like Data Structures and Algorithms (DSA) often resembles a fixed, linear path. A cohort of students, each with a unique cognitive landscape of strengths and weaknesses, is guided through the same sequence of content, exercises, and assessments. This "one-size-fits-all" model presents several fundamental challenges:
 
 -   **Lack of Personalization:** It fails to account for individual differences in learning styles and cognitive abilities. A student strong in abstract thinking may be bored by repetitive basic exercises, while another struggling with logical formulation may be left behind by a rapid jump in complexity.
@@ -13,6 +15,8 @@ This static horizon often leads to disengagement, frustration, and a superficial
 
 ## 2. Our Solution: The AI as a Personalized Cognitive Partner
 
+<img width="2359" height="1234" alt="image" src="https://github.com/user-attachments/assets/ade9f1e9-e6e9-460c-aece-069bdcef196a" />
+
 EduPlanner DSA is architected around a transformative idea: **what if an AI could act not just as a content repository, but as an intelligent, empathetic partner that understands *how* a student thinks?**
 
 Our system moves beyond simple adaptivity (like suggesting an easier problem after a failure) into the realm of **cognitive partnership**. It builds a dynamic model of each learner's unique problem-solving profile and uses this model to create a truly bespoke educational experience. This is achieved through three core pillars of innovation.
@@ -20,6 +24,8 @@ Our system moves beyond simple adaptivity (like suggesting an easier problem aft
 ### Pillar I: Dynamic Cognitive Profiling
 
 At the heart of EduPlanner DSA lies the **Cognitive Profile**, an AI-inferred model of a student's problem-solving tendencies across four key axes:
+
+<img width="2357" height="1226" alt="image" src="https://github.com/user-attachments/assets/8ed1d496-b318-4871-aceb-0fcd42952389" />
 
 1.  **Logical Reasoning:** The ability to construct sound, step-by-step arguments and translate them into valid algorithmic logic.
 2.  **Abstract Thinking:** The capacity to work with complex, non-obvious concepts, devise efficient data structures, and understand the "big picture" of an algorithm's design.
@@ -31,6 +37,9 @@ This profile is not a static label. It is a **living model**, continuously and s
 ### Pillar II: The Synergistic Learning Ecosystem
 
 The platform's features are not isolated tools; they form an interconnected, virtuous cycle of learning, practice, and reflection:
+
+<img width="1996" height="1140" alt="image" src="https://github.com/user-attachments/assets/8bd35e26-55c4-46f0-8b7d-e12f2cd147d1" />
+
 
 -   The **Skill Tree** provides a visual map of the knowledge domain, giving the student agency and a clear view of their progress.
 -   **Intelligent Recommendations** are driven by the cognitive profile. The AI doesn't just suggest the "next" topic; it might recommend a problem that specifically targets a cognitive weakness (e.g., a tricky edge-case problem to bolster "Attention to Detail") or leverages a strength to build confidence.
