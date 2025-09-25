@@ -1,7 +1,7 @@
-const express = require('express');
-const { GoogleGenAI } = require('@google/genai');
-const cors = require('cors');
-require('dotenv').config();
+import express from 'express';
+import { GoogleGenAI } from '@google/genai';
+import cors from 'cors';
+import 'dotenv/config';
 
 // Initialize Express App
 const app = express();
